@@ -91,10 +91,8 @@ class InterfaceDamier(tk.Frame):
         
         if (self.partie.joueur_courant_peut_prendre_piece_adverse()):
             self.ldoit_prendre["text"] = "Vous devez prendre"
-            print("Yo")
         else:
             self.ldoit_prendre["text"] = "Aucune prise obligatoire"
-            print("Yo")
     
     def ajouter_piece(self, position, nom_piece):
         """
@@ -130,47 +128,48 @@ class InterfaceDamier(tk.Frame):
 
         if (event.widget.winfo_name() == self.canvas.winfo_name()):
             position = ((event.y // self.taille_case), (event.x // self.taille_case))
-            
-        self.verifier_deplacement_force()
         
-        if (self.source_selectionnee == []):
-            try:
-                self.partie.valider_position_source(position)
-                self.lerreur["text"] = ""
-                self.source_selectionnee.append(position)
-                x1, y1 = (event.x // self.taille_case) * self.taille_case, (event.y // self.taille_case) * self.taille_case
-                x2, y2 = (event.x // self.taille_case) * self.taille_case + self.taille_case, (event.y // self.taille_case) * self.taille_case + self.taille_case
-                self.source_selectionnee.append((x1, y1))
-                self.source_selectionnee.append((x2, y2))
-                self.canvas.create_rectangle(x1, y1, x2, y2, outline="black", fill="blue", tags="case")
-                self.canvas.tag_raise("piece")
-                self.canvas.tag_lower("case")
-                
-            except Exception as e:
-                self.lerreur["text"] = e
-        else:
-            try:
-                if (self.source_selectionnee[0] == position):
-                    self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
-                    self.canvas.tag_raise("piece")
-                    self.canvas.tag_lower("case")
-                    self.source_selectionnee = []
-                    
-                else:
-                    self.partie.valider_position_cible(self.source_selectionnee[0], position)
+            if (self.source_selectionnee == []):
+                try:
+                    self.partie.valider_position_source(position)
                     self.lerreur["text"] = ""
+                    self.source_selectionnee.append(position)
                     x1, y1 = (event.x // self.taille_case) * self.taille_case, (event.y // self.taille_case) * self.taille_case
                     x2, y2 = (event.x // self.taille_case) * self.taille_case + self.taille_case, (event.y // self.taille_case) * self.taille_case + self.taille_case
-                    self.partie.damier.deplacer(self.source_selectionnee[0], position)
-                    self.placer_piece(position, self.partie.damier.cases[position].nom)
-                    self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
-                    self.source_selectionnee = []
-                    self.partie.passer_au_joueur_suivant()
-                    self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
-                    self.initialise_jeu()
-                
-            except Exception as e:
-                self.lerreur["text"] = e
+                    self.source_selectionnee.append((x1, y1))
+                    self.source_selectionnee.append((x2, y2))
+                    self.canvas.create_rectangle(x1, y1, x2, y2, outline="black", fill="blue", tags="case")
+                    self.canvas.tag_raise("piece")
+                    self.canvas.tag_lower("case")
+
+                except Exception as e:
+                    self.lerreur["text"] = e
+            else:
+                try:
+                    if (self.source_selectionnee[0] == position):
+                        self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
+                        self.canvas.tag_raise("piece")
+                        self.canvas.tag_lower("case")
+                        self.source_selectionnee = []
+
+                    else:
+                        self.partie.valider_position_cible(self.source_selectionnee[0], position)
+                        self.lerreur["text"] = ""
+                        x1, y1 = (event.x // self.taille_case) * self.taille_case, (event.y // self.taille_case) * self.taille_case
+                        x2, y2 = (event.x // self.taille_case) * self.taille_case + self.taille_case, (event.y // self.taille_case) * self.taille_case + self.taille_case
+                        self.partie.damier.deplacer(self.source_selectionnee[0], position)
+                        self.placer_piece(position, self.partie.damier.cases[position].nom)
+                        self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
+                        self.source_selectionnee = []
+                        self.partie.passer_au_joueur_suivant()
+                        self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+                        self.initialise_jeu()
+
+                except Exception as e:
+                    self.lerreur["text"] = e
+
+        self.verifier_deplacement_force()
+
 
     def actualiser(self, event):
         """
