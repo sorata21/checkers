@@ -10,7 +10,8 @@ class InterfaceDamier(tk.Frame):
     @author: Bryan Oakley, Camille Besse, Jean-Francis Roy
     """
 
-    def __init__(self, parent, taille_case):
+    def __init__(self, parent, taille_case, partie):
+        
         """taille_case est la taille d'un côté d'une case en pixels."""
         # Definition du damier : # de cases
         self.n_lignes = 8
@@ -23,8 +24,9 @@ class InterfaceDamier(tk.Frame):
         self.couleur1 = "white"
         self.couleur2 = "gray"
 
-        # Pièces sur le damier
-        self.pieces = {}
+        self.partie = partie
+        
+        self.source_selectionnee = []
 
         # Calcul de la taille du dessin
         canvas_width = self.n_colonnes * self.taille_case
@@ -35,37 +37,74 @@ class InterfaceDamier(tk.Frame):
 
         # Initialisation du canvas
         self.canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0, width=canvas_width, height=canvas_height,
-                               background="white")
+                               background=None, name = "damier")
 
         # On place le canvas et le plateau (self) à l'aide de "grid".
-        self.canvas.grid(padx=2, pady=2, sticky=tk.N + tk.S + tk.E + tk.W)
-        self.grid(padx=4, pady=4, sticky=tk.N + tk.S + tk.E + tk.W)
+        self.canvas.grid(sticky = tk.W)
+        self.grid(rowspan = 2, sticky=tk.N + tk.S + tk.E + tk.W)
+        
+        self.menu = tk.Menu(parent)
+        
+        self.menu.add_command(label = "Nouvelle partie", command = self.nouvelle_partie)
+        self.menu.add_command(label = "Charger partie")
+        self.menu.add_command(label = "Sauvegarder partie")
+        self.menu.add_command(label = "Charger partie avec déplacements")
+        self.menu.add_command(label = "Sauvegarder partie avec déplacements")
+        self.menu.add_command(label = "Quitter", command = parent.quit)
+        
+        parent.config(menu = self.menu)
+        
+        self.informations = tk.LabelFrame(parent, text = "Informations", padx = 15)
+        self.informations.grid(column = 1, row = 0, sticky = tk.W + tk.N)
+        
+        self.ltour = tk.Label(self.informations, text = "Tour du joueur " + self.partie.couleur_joueur_courant)
+        self.ltour.grid()
+        self.ldoit_prendre = tk.Label(self.informations, text = "Aucune prise obligatoire.")
+        self.ldoit_prendre.grid()
+        self.lpiece_forcee = tk.Label(self.informations, text = "Aucune pièce forcée.")
+        self.lpiece_forcee.grid()
+        
+        self.deplacements = tk.LabelFrame(parent, text = "Déplacements")
+        self.deplacements.grid(column = 1, row = 1, sticky = tk.W + tk.N)
+        
+        tk.Text(self.deplacements, width = 20, height = 24).grid(column = 3, row = 1)
+        
+        self.lerreur = tk.Label(parent, text = "", foreground = "red")
+        self.lerreur.grid(column = 0, row = 2, sticky = tk.W)
+        
+        parent.bind("<Button-1>", self.deplacement)
 
         # Fait en sorte que le redimensionnement de la fenêtre redimensionne le damier
         self.canvas.bind("<Configure>", self.actualiser)
+        
+        self.initialise_jeu()
 
-
+    
+    def nouvelle_partie(self):
+        
+        self.partie.nouvelle_partie()
+        self.canvas.delete("piece")
+        self.initialise_jeu()
+        
+    
+    def verifier_deplacement_force(self):
+        
+        if (self.partie.joueur_courant_peut_prendre_piece_adverse()):
+            self.ldoit_prendre["text"] = "Vous devez prendre"
+            print("Yo")
+        else:
+            self.ldoit_prendre["text"] = "Aucune prise obligatoire"
+            print("Yo")
+    
     def ajouter_piece(self, position, nom_piece):
         """
         Ajoute une pièce sur le damier.
         """
 
-        # Caractères unicode des pièces
-        caracteres_unicode_pieces = {"PB": "\u26C0",
-                                    "DB": "\u26C1",
-                                    "PN": "\u26C2",
-                                    "DN": "\u26C3"}
-
-        tempfont = ('Helvetica', self.taille_case//2)
-        piece_unicode = caracteres_unicode_pieces[nom_piece[0:2]]
-
         # On "dessine" la pièce
         ligne, colonne = position
-        self.canvas.create_text(ligne, colonne, text=piece_unicode, tags=(nom_piece, "piece"), font=tempfont)
-
-        # On ajoute la piece dans le dictionnaire
-        self.pieces[(ligne, colonne)] = nom_piece
-
+        self.canvas.create_text(ligne, colonne, text=self.partie.damier.cases[position], tags=(nom_piece, "piece"))
+        
         # On place la pièce dans le canvas (appel de placer_piece)
         self.placer_piece((ligne, colonne), nom_piece)
 
@@ -86,7 +125,52 @@ class InterfaceDamier(tk.Frame):
         self.canvas.itemconfigure(nom_piece, font=tempfont)
 
         self.canvas.coords(nom_piece, x, y)
+        
+    def deplacement(self, event):
 
+        if (event.widget.winfo_name() == self.canvas.winfo_name()):
+            position = ((event.y // self.taille_case), (event.x // self.taille_case))
+            
+        self.verifier_deplacement_force()
+        
+        if (self.source_selectionnee == []):
+            try:
+                self.partie.valider_position_source(position)
+                self.lerreur["text"] = ""
+                self.source_selectionnee.append(position)
+                x1, y1 = (event.x // self.taille_case) * self.taille_case, (event.y // self.taille_case) * self.taille_case
+                x2, y2 = (event.x // self.taille_case) * self.taille_case + self.taille_case, (event.y // self.taille_case) * self.taille_case + self.taille_case
+                self.source_selectionnee.append((x1, y1))
+                self.source_selectionnee.append((x2, y2))
+                self.canvas.create_rectangle(x1, y1, x2, y2, outline="black", fill="blue", tags="case")
+                self.canvas.tag_raise("piece")
+                self.canvas.tag_lower("case")
+                
+            except Exception as e:
+                self.lerreur["text"] = e
+        else:
+            try:
+                if (self.source_selectionnee[0] == position):
+                    self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
+                    self.canvas.tag_raise("piece")
+                    self.canvas.tag_lower("case")
+                    self.source_selectionnee = []
+                    
+                else:
+                    self.partie.valider_position_cible(self.source_selectionnee[0], position)
+                    self.lerreur["text"] = ""
+                    x1, y1 = (event.x // self.taille_case) * self.taille_case, (event.y // self.taille_case) * self.taille_case
+                    x2, y2 = (event.x // self.taille_case) * self.taille_case + self.taille_case, (event.y // self.taille_case) * self.taille_case + self.taille_case
+                    self.partie.damier.deplacer(self.source_selectionnee[0], position)
+                    self.placer_piece(position, self.partie.damier.cases[position].nom)
+                    self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
+                    self.source_selectionnee = []
+                    self.partie.passer_au_joueur_suivant()
+                    self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+                    self.initialise_jeu()
+                
+            except Exception as e:
+                self.lerreur["text"] = e
 
     def actualiser(self, event):
         """
@@ -124,43 +208,19 @@ class InterfaceDamier(tk.Frame):
                     color = self.couleur2
 
         # On redessine les pieces
-        for position, nom in self.pieces.items():
-            self.placer_piece(position, nom)
+        for position in self.partie.damier.cases.keys():
+            self.placer_piece(position, self.partie.damier.cases[position].nom)
 
         # On mets les pieces au dessus des cases
         self.canvas.tag_raise("piece")
         self.canvas.tag_lower("case")
 
-
-def initialise_jeu(plateau):
-        plateau.ajouter_piece((7, 0), "PB1")
-        plateau.ajouter_piece((7, 2), "PB2")
-        plateau.ajouter_piece((7, 4), "PB3")
-        plateau.ajouter_piece((7, 6), "PB4")
-        plateau.ajouter_piece((6, 1), "PB5")
-        plateau.ajouter_piece((6, 3), "PB6")
-        plateau.ajouter_piece((6, 5), "PB7")
-        plateau.ajouter_piece((6, 7), "PB8")
-        plateau.ajouter_piece((5, 0), "PB9")
-        plateau.ajouter_piece((5, 2), "PB10")
-        plateau.ajouter_piece((5, 4), "PB11")
-        plateau.ajouter_piece((5, 6), "PB12")
-        plateau.ajouter_piece((2, 1), "PN1")
-        plateau.ajouter_piece((2, 3), "PN2")
-        plateau.ajouter_piece((2, 5), "PN3")
-        plateau.ajouter_piece((2, 7), "PN4")
-        plateau.ajouter_piece((1, 0), "PN5")
-        plateau.ajouter_piece((1, 2), "PN6")
-        plateau.ajouter_piece((1, 4), "PN7")
-        plateau.ajouter_piece((1, 6), "PN8")
-        plateau.ajouter_piece((0, 1), "PN9")
-        plateau.ajouter_piece((0, 3), "PN10")
-        plateau.ajouter_piece((0, 5), "PN11")
-        plateau.ajouter_piece((0, 7), "PN12")
-
-
-
-# Ajouts pour le TP4, idée de base...
+    def initialise_jeu(self):
+            
+        self.canvas.delete("piece")
+        
+        for cle in self.partie.damier.cases.keys():
+            self.ajouter_piece(cle, self.partie.damier.cases[cle].nom)
 
 class JeuDeDames:
     def __init__(self):
@@ -171,12 +231,8 @@ class JeuDeDames:
         self.partie = Partie()
 
         # On a besoin d'un damier, qu'on placera dans notre fenêtre...
-        self.interface_damier = InterfaceDamier(self.fenetre, 64)
+        self.interface_damier = InterfaceDamier(self.fenetre, 64, self.partie)
         self.interface_damier.grid()
-
-        # Par contre on aura probablement à modifier la classe InterfaceDamier pour
-        # y inclure notre partie! À vous de jouer!
-
 
         # Truc pour le redimensionnement automatique des éléments de la fenêtre.
         self.fenetre.grid_columnconfigure(0, weight=1)
@@ -185,7 +241,6 @@ class JeuDeDames:
         # Truc pour le redimensionnement automatique des éléments du plateau.
         self.interface_damier.grid_columnconfigure(0, weight=1)
         self.interface_damier.grid_rowconfigure(0, weight=1)
-
 
         # Boucle principale.
         self.fenetre.mainloop()
