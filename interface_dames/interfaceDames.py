@@ -69,8 +69,11 @@ class InterfaceDamier(tk.Frame):
         self.deplacements.grid(column = 1, row = 1, sticky = tk.W + tk.N)
 
         # Texte : Historique de Déplacements
-        self.historique = tk.Text(self.deplacements, width = 25, height = 24)
+        self.historique = tk.Text(self.deplacements, width = 25, height = 15)
         self.historique.grid(column = 3, row = 1)
+        self.scrollbar = tk.Scrollbar(self.historique)
+        self.historique['yscrollcommand'] = self.scrollbar.set
+        self.scrollbar.grid(column = 1, row =0, sticky = 'ns')
         
         self.lerreur = tk.Label(parent, text = "", foreground = "red")
         self.lerreur.grid(column = 0, row = 2, sticky = tk.W)
