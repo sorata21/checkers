@@ -96,7 +96,7 @@ class InterfaceDamier(tk.Frame):
         self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
         self.verifier_deplacement_force()
         self.lpiece_forcee["text"] = "Aucune pièce forcée."
-        self.lerreur = ""
+        self.lerreur["text"] = ""
         self.actualiser_jeu()
 
     def verifier_deplacement_force(self):
@@ -107,8 +107,10 @@ class InterfaceDamier(tk.Frame):
 
         if (self.partie.joueur_courant_peut_prendre_piece_adverse()):
             self.ldoit_prendre["text"] = "Vous devez prendre"
+            self.partie.doit_prendre = True
         else:
             self.ldoit_prendre["text"] = "Aucune prise obligatoire"
+            self.partie.doit_prendre = False
 
     def ajouter_piece(self, position, nom_piece):
         """
@@ -200,9 +202,12 @@ class InterfaceDamier(tk.Frame):
                             self.source_selectionnee = []
                             self.partie.passer_au_joueur_suivant()
                             self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+
                         elif (self.partie.damier.position_peut_prendre_une_piece_adverse(position)):
-                            self.source_selectionnee = []
-                            self.lpiece_forcee["text"] = "TEST!!!"
+                            # Force la position source puis affiche la position cible forcée dans lpiece_forcee.
+                            self.source_selectionnee[0] = position
+                            self.lpiece_forcee["text"] = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(position)
+
                         else:
                             # Met à jour les paramêtres une fois le coup joué
                             self.source_selectionnee = []
