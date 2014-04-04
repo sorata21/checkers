@@ -69,7 +69,7 @@ class InterfaceDamier(tk.Frame):
         self.deplacements.grid(column = 1, row = 1, sticky = tk.W + tk.N)
 
         # Texte : Historique de Déplacements
-        self.historique = tk.Text(self.deplacements, width = 20, height = 24)
+        self.historique = tk.Text(self.deplacements, width = 25, height = 24)
         self.historique.grid(column = 3, row = 1)
         
         self.lerreur = tk.Label(parent, text = "", foreground = "red")
@@ -131,9 +131,10 @@ class InterfaceDamier(tk.Frame):
 
         self.canvas.coords(nom_piece, x, y)
 
+    # Ajoute les informations de déplacements dans le widgets Text self.historique
     def add_historique(self, source, dest):
-        move = "{} -> {} \n".format(source, dest)
-        self.historique.insert(move)
+        move = self.partie.couleur_joueur_courant+(": {}->{} \n".format(source, dest))
+        self.historique.insert("end", move)
 
         
     def deplacement(self, event):
@@ -170,8 +171,18 @@ class InterfaceDamier(tk.Frame):
                         x1, y1 = (event.x // self.taille_case) * self.taille_case, (event.y // self.taille_case) * self.taille_case
                         x2, y2 = (event.x // self.taille_case) * self.taille_case + self.taille_case, (event.y // self.taille_case) * self.taille_case + self.taille_case
                         self.partie.damier.deplacer(self.source_selectionnee[0], position)
+
+                        #Lorsque prend les information source et cible du déplacement et les place en variable
+                        psource = self.source_selectionnee[0]
+                        pcible = position
+
                         self.placer_piece(position, self.partie.damier.cases[position].nom)
                         self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
+
+                        # Prend les variable de déplacement pour les ajouté à l'historique
+                        self.add_historique(psource, pcible)
+
+                        # Reset des paramêtres
                         self.source_selectionnee = []
                         self.partie.passer_au_joueur_suivant()
                         self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
