@@ -76,13 +76,17 @@ class InterfaceDamier(tk.Frame):
 
         # Fait en sorte que le redimensionnement de la fenêtre redimensionne le damier
         self.canvas.bind("<Configure>", self.actualiser)
-        
+
         self.initialise_jeu()
 
     
     def nouvelle_partie(self):
         
         self.partie.nouvelle_partie()
+        self.ltour = "Tour du joueur " + self.partie.couleur_joueur_courant
+        self.verifier_deplacement_force()
+        self.lpiece_forcee = "Aucune pièce forcée."
+        self.lerreur = ""
         self.canvas.delete("piece")
         self.initialise_jeu()
         
@@ -169,7 +173,6 @@ class InterfaceDamier(tk.Frame):
                     self.lerreur["text"] = e
 
         self.verifier_deplacement_force()
-
 
     def actualiser(self, event):
         """
