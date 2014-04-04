@@ -63,11 +63,14 @@ class InterfaceDamier(tk.Frame):
         self.ldoit_prendre.grid()
         self.lpiece_forcee = tk.Label(self.informations, text = "Aucune pièce forcée.")
         self.lpiece_forcee.grid()
-        
+
+        # Frame : Historique de Déplacements
         self.deplacements = tk.LabelFrame(parent, text = "Déplacements")
         self.deplacements.grid(column = 1, row = 1, sticky = tk.W + tk.N)
-        
-        tk.Text(self.deplacements, width = 20, height = 24).grid(column = 3, row = 1)
+
+        # Texte : Historique de Déplacements
+        self.historique = tk.Text(self.deplacements, width = 20, height = 24)
+        self.historique.grid(column = 3, row = 1)
         
         self.lerreur = tk.Label(parent, text = "", foreground = "red")
         self.lerreur.grid(column = 0, row = 2, sticky = tk.W)
@@ -127,6 +130,11 @@ class InterfaceDamier(tk.Frame):
         self.canvas.itemconfigure(nom_piece, font=tempfont)
 
         self.canvas.coords(nom_piece, x, y)
+
+    def add_historique(self, source, dest):
+        move = "{} -> {} \n".format(source, dest)
+        self.historique.insert(move)
+
         
     def deplacement(self, event):
 
