@@ -24,10 +24,8 @@ class InterfaceDamier(tk.Frame):
         self.couleur1 = "white"
         self.couleur2 = "gray"
 
-        # Assignation de la partie courante
         self.partie = partie
-
-        #Liste pour conserver la position source et ses coordonnées (x1, y1) et (x2, y2)
+        
         self.source_selectionnee = []
 
         # Calcul de la taille du dessin
@@ -44,8 +42,7 @@ class InterfaceDamier(tk.Frame):
         # On place le canvas et le plateau (self) à l'aide de "grid".
         self.canvas.grid(sticky = tk.W)
         self.grid(rowspan = 2, sticky=tk.N + tk.S + tk.E + tk.W)
-
-        # Création du menu, de ses composantes et ajout à la fenêtre
+        
         self.menu = tk.Menu(parent)
         
         self.menu.add_command(label = "Nouvelle partie", command = self.nouvelle_partie)
@@ -56,8 +53,7 @@ class InterfaceDamier(tk.Frame):
         self.menu.add_command(label = "Quitter", command = parent.quit)
         
         parent.config(menu = self.menu)
-
-        # Création du LabelFrame et des Label pour contenir les informations sur la partie courante
+        
         self.informations = tk.LabelFrame(parent, text = "Informations", padx = 15)
         self.informations.grid(column = 1, row = 0, sticky = tk.W + tk.N)
         
@@ -68,46 +64,41 @@ class InterfaceDamier(tk.Frame):
         self.lpiece_forcee = tk.Label(self.informations, text = "Aucune pièce forcée.")
         self.lpiece_forcee.grid()
 
-        # Création du LabelFrame et du Text pour afficher l'historique des déplacements
+        # Frame : Historique de Déplacements
         self.deplacements = tk.LabelFrame(parent, text = "Déplacements")
         self.deplacements.grid(column = 1, row = 1, sticky = tk.W + tk.N)
 
-        self.historique = tk.Text(self.deplacements, width = 25, height = 24)
+        # Texte : Historique de Déplacements
+        self.historique = tk.Text(self.deplacements, width = 25, height = 15)
         self.historique.grid(column = 3, row = 1)
-
-        #Création du Label pour afficher les erreurs
+        self.scrollbar = tk.Scrollbar(self.historique)
+        self.historique['yscrollcommand'] = self.scrollbar.set
+        self.scrollbar.grid(column = 1, row =0, sticky = 'ns')
+        
         self.lerreur = tk.Label(parent, text = "", foreground = "red")
         self.lerreur.grid(column = 0, row = 2, sticky = tk.W)
-
-        #Gestion des clics
+        
         parent.bind("<Button-1>", self.deplacement)
 
         # Fait en sorte que le redimensionnement de la fenêtre redimensionne le damier
         self.canvas.bind("<Configure>", self.actualiser)
 
-        # Affiche les pièces sur le damier
-        self.actualiser_jeu()
+        self.initialise_jeu()
 
     
     def nouvelle_partie(self):
-        """
-        Remet tous les paramètres par défaut puis réaffiche le jeu.
-        """
-
+        
         self.partie.nouvelle_partie()
         self.ltour = "Tour du joueur " + self.partie.couleur_joueur_courant
-        self.ldoit_prendre["text"] = "Aucune prise obligatoire"
+        self.verifier_deplacement_force()
         self.lpiece_forcee = "Aucune pièce forcée."
         self.lerreur = ""
-        self.actualiser_jeu()
+        self.canvas.delete("piece")
+        self.initialise_jeu()
         
     
     def verifier_deplacement_force(self):
-        """
-        Vérifie si le joueur courant doit prendre une pièce et met à jour le Label
-        self.ldoit_prendre en conséquence.
-        """
-
+        
         if (self.partie.joueur_courant_peut_prendre_piece_adverse()):
             self.ldoit_prendre["text"] = "Vous devez prendre"
         else:
@@ -143,24 +134,19 @@ class InterfaceDamier(tk.Frame):
 
         self.canvas.coords(nom_piece, x, y)
 
+    # Ajoute les informations de déplacements dans le widgets Text self.historique
     def add_historique(self, source, dest):
-        """
-        Ajoute les informations de déplacements dans le Text self.historique
-        """
-
         move = self.partie.couleur_joueur_courant+(": {}->{} \n".format(source, dest))
         self.historique.insert("end", move)
+
         
     def deplacement(self, event):
 
-        # Vérifie que que l'événement à eu lieu sur le damier.
         if (event.widget.winfo_name() == self.canvas.winfo_name()):
             position = ((event.y // self.taille_case), (event.x // self.taille_case))
-
-            # Vérifie s'il s'agit d'un clic pour la source
+        
             if (self.source_selectionnee == []):
                 try:
-                    #Valide la source, puis met la pièce sélectionnée en bleu.
                     self.partie.valider_position_source(position)
                     self.lerreur["text"] = ""
                     self.source_selectionnee.append(position)
@@ -176,7 +162,6 @@ class InterfaceDamier(tk.Frame):
                     self.lerreur["text"] = e
             else:
                 try:
-                    # Si la position source et la position cible sont les mêmes, remet la case en gris
                     if (self.source_selectionnee[0] == position):
                         self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
                         self.canvas.tag_raise("piece")
@@ -184,21 +169,27 @@ class InterfaceDamier(tk.Frame):
                         self.source_selectionnee = []
 
                     else:
-                        # Valide la position cible, puis effectue le déplacement
                         self.partie.valider_position_cible(self.source_selectionnee[0], position)
                         self.lerreur["text"] = ""
+                        x1, y1 = (event.x // self.taille_case) * self.taille_case, (event.y // self.taille_case) * self.taille_case
+                        x2, y2 = (event.x // self.taille_case) * self.taille_case + self.taille_case, (event.y // self.taille_case) * self.taille_case + self.taille_case
                         self.partie.damier.deplacer(self.source_selectionnee[0], position)
+
+                        #Lorsque prend les information source et cible du déplacement et les place en variable
+                        psource = self.source_selectionnee[0]
+                        pcible = position
+
                         self.placer_piece(position, self.partie.damier.cases[position].nom)
                         self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
 
-                        # Ajoute le déplacement à l'historique
-                        self.add_historique(self.source_selectionnee[0], position)
+                        # Prend les variable de déplacement pour les ajouté à l'historique
+                        self.add_historique(psource, pcible)
 
-                        # Met à jour les paramêtres une fois le coup joué
+                        # Reset des paramêtres
                         self.source_selectionnee = []
                         self.partie.passer_au_joueur_suivant()
                         self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
-                        self.actualiser_jeu()
+                        self.initialise_jeu()
 
                 except Exception as e:
                     self.lerreur["text"] = e
@@ -248,7 +239,7 @@ class InterfaceDamier(tk.Frame):
         self.canvas.tag_raise("piece")
         self.canvas.tag_lower("case")
 
-    def actualiser_jeu(self):
+    def initialise_jeu(self):
             
         self.canvas.delete("piece")
         
