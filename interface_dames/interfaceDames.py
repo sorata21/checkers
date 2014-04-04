@@ -93,12 +93,11 @@ class InterfaceDamier(tk.Frame):
         """
 
         self.partie.nouvelle_partie()
-        self.ltour = "Tour du joueur " + self.partie.couleur_joueur_courant
+        self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
         self.verifier_deplacement_force()
-        self.lpiece_forcee = "Aucune pièce forcée."
+        self.lpiece_forcee["text"] = "Aucune pièce forcée."
         self.lerreur = ""
         self.actualiser_jeu()
-
 
     def verifier_deplacement_force(self):
         """
@@ -122,7 +121,6 @@ class InterfaceDamier(tk.Frame):
 
         # On place la pièce dans le canvas (appel de placer_piece)
         self.placer_piece((ligne, colonne), nom_piece)
-
 
     def placer_piece(self, position, nom_piece):
         """
@@ -148,7 +146,6 @@ class InterfaceDamier(tk.Frame):
 
         move = self.partie.couleur_joueur_courant+(": {}->{} \n".format(source, dest))
         self.historique.insert("end", move)
-
 
     def deplacement(self, event):
 
@@ -177,7 +174,9 @@ class InterfaceDamier(tk.Frame):
                 try:
                     # Si la position source et la position cible sont les mêmes, remet la case en gris
                     if (self.source_selectionnee[0] == position):
-                        self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
+                        self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1],
+                                                     self.source_selectionnee[2][0], self.source_selectionnee[2][1],
+                                                     outline="black", fill=self.couleur2, tags="case")
                         self.canvas.tag_raise("piece")
                         self.canvas.tag_lower("case")
                         self.source_selectionnee = []
@@ -186,17 +185,30 @@ class InterfaceDamier(tk.Frame):
                         # Valide la position cible, puis effectue le déplacement
                         self.partie.valider_position_cible(self.source_selectionnee[0], position)
                         self.lerreur["text"] = ""
-                        self.partie.damier.deplacer(self.source_selectionnee[0], position)
+                        test_prise = self.partie.damier.deplacer(self.source_selectionnee[0], position)
                         self.placer_piece(position, self.partie.damier.cases[position].nom)
-                        self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1], self.source_selectionnee[2][0], self.source_selectionnee[2][1], outline="black", fill=self.couleur2, tags="case")
+                        self.canvas.create_rectangle(self.source_selectionnee[1][0], self.source_selectionnee[1][1],
+                                                     self.source_selectionnee[2][0], self.source_selectionnee[2][1],
+                                                     outline="black", fill=self.couleur2, tags="case")
 
                         # Ajoute le déplacement à l'historique
                         self.add_historique(self.source_selectionnee[0], position)
 
-                        # Met à jour les paramêtres une fois le coup joué
-                        self.source_selectionnee = []
-                        self.partie.passer_au_joueur_suivant()
-                        self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+                        #Vérifie si le joueur peut faire une deuxième prise.
+                        if (not test_prise):
+                            # Met à jour les paramêtres une fois le coup joué
+                            self.source_selectionnee = []
+                            self.partie.passer_au_joueur_suivant()
+                            self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+                        elif (self.partie.damier.position_peut_prendre_une_piece_adverse(position)):
+                            self.source_selectionnee = []
+                            self.lpiece_forcee["text"] = "TEST!!!"
+                        else:
+                            # Met à jour les paramêtres une fois le coup joué
+                            self.source_selectionnee = []
+                            self.partie.passer_au_joueur_suivant()
+                            self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+
                         self.actualiser_jeu()
 
                 except Exception as e:
@@ -279,4 +291,3 @@ class JeuDeDames:
 
         # Boucle principale.
         self.fenetre.mainloop()
-
