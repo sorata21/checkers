@@ -117,6 +117,21 @@ class InterfaceDamier(tk.Frame):
             self.partie.charger(nom_fichier)
             self.actualiser_jeu()
             self.verifier_deplacement_force()
+            self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+
+            liste_position = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(self.partie.position_source_forcee,
+                                                                                                   self.partie.doit_prendre)
+            if (liste_position == []):
+                self.lpiece_forcee["text"] = "Aucune pièce forcée."
+            elif len(liste_position) == 1:
+                str_temp = "Position cible forcée : " + str(liste_position[0])
+            else:
+                str_temp = "Positions cibles forcées : "
+                for e in liste_position:
+                    str_temp += str(e) + " "
+
+            self.lpiece_forcee["text"] = str_temp
+
         except Exception:
             pass
 
@@ -127,6 +142,7 @@ class InterfaceDamier(tk.Frame):
         try:
             nom_fichier = filedialog.asksaveasfilename(title = "Sauvegarder la partie")
             self.partie.sauvegarder(nom_fichier)
+
         except Exception:
             pass
 
