@@ -64,7 +64,7 @@ class InterfaceDamier(tk.Frame):
         self.ltour.grid()
         self.ldoit_prendre = tk.Label(self.informations, text = "Aucune prise obligatoire.")
         self.ldoit_prendre.grid()
-        self.lpiece_forcee = tk.Label(self.informations, text = "Aucune pièce forcée.")
+        self.lpiece_forcee = tk.Label(self.informations, text = "Aucune pièce forcée.", width = 30)
         self.lpiece_forcee.grid()
 
         # Création du LabelFrame et du Text pour afficher l'historique des déplacements
@@ -204,15 +204,26 @@ class InterfaceDamier(tk.Frame):
                             self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
 
                         elif (self.partie.damier.position_peut_prendre_une_piece_adverse(position)):
-                            # Force la position source puis affiche la position cible forcée dans lpiece_forcee.
+                            # Force la position source, puis affiche la position cible forcée dans lpiece_forcee.
                             self.source_selectionnee[0] = position
-                            self.lpiece_forcee["text"] = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(position)
+                            print(self.partie.doit_prendre)
+                            liste_position = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(position, self.partie.doit_prendre)
+
+                            if len(liste_position) == 1:
+                                str_temp = "Position cible forcée : " + str(liste_position[0])
+                            else:
+                                str_temp = "Positions cibles forcées : "
+                                for e in liste_position:
+                                    str_temp += str(e) + " "
+
+                            self.lpiece_forcee["text"] = str_temp
 
                         else:
                             # Met à jour les paramêtres une fois le coup joué
                             self.source_selectionnee = []
                             self.partie.passer_au_joueur_suivant()
                             self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+                            self.lpiece_forcee["text"] = "Aucune pièce forcée."
 
                         self.actualiser_jeu()
 
