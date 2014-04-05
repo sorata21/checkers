@@ -2,6 +2,7 @@
 # -*- coding:Utf-8 -*-
 
 import tkinter as tk
+from tkinter import filedialog
 from dames.partie import Partie
 
 class InterfaceDamier(tk.Frame):
@@ -50,7 +51,7 @@ class InterfaceDamier(tk.Frame):
         self.menu = tk.Menu(parent)
 
         self.menu.add_command(label = "Nouvelle partie", command = self.nouvelle_partie)
-        self.menu.add_command(label = "Charger partie")
+        self.menu.add_command(label = "Charger partie", command = self.charger_partie)
         self.menu.add_command(label = "Sauvegarder partie")
         self.menu.add_command(label = "Charger partie avec déplacements")
         self.menu.add_command(label = "Sauvegarder partie avec déplacements")
@@ -99,8 +100,19 @@ class InterfaceDamier(tk.Frame):
         self.verifier_deplacement_force()
         self.lpiece_forcee["text"] = "Aucune pièce forcée."
         self.lerreur["text"] = ""
+        self.historique.delete(1.0, tk.END)
         self.parent.bind("<Button-1>", self.deplacement)
         self.actualiser_jeu()
+
+    def charger_partie(self):
+        """
+        Charge la partie choisie par l'utilisateur.
+        """
+
+        nom_fichier = filedialog.askopenfilename(title = "Partie à charger")
+        self.partie.charger(nom_fichier)
+        self.actualiser_jeu()
+        self.verifier_deplacement_force()
 
     def verifier_deplacement_force(self):
         """
@@ -202,13 +214,13 @@ class InterfaceDamier(tk.Frame):
                         #Vérifie si le joueur peut faire une deuxième prise.
                         if (not test_prise):
                             # Met à jour les paramêtres une fois le coup joué
-                            self.source_selectionnee = []
+                            self.partie.position_source_forcee = None
                             self.partie.passer_au_joueur_suivant()
                             self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
 
                         elif (self.partie.damier.position_peut_prendre_une_piece_adverse(position)):
                             # Force la position source, puis affiche la position cible forcée dans lpiece_forcee.
-                            self.source_selectionnee[0] = position
+                            self.partie.position_source_forcee = position
                             liste_position = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(position, self.partie.doit_prendre)
 
                             if len(liste_position) == 1:
@@ -223,16 +235,17 @@ class InterfaceDamier(tk.Frame):
                         else:
                             # Vérifie si la partie est terminée. Si ce n'est pas le cas, met à jour les paramètres
                             # et passe au joueur suivant
+                            self.partie.position_source_forcee = None
                             joueur_actuel = self.partie.couleur_joueur_courant
                             self.partie.passer_au_joueur_suivant()
                             if (self.partie.damier.lister_deplacements_possibles_de_couleur(self.partie.couleur_joueur_courant)):
-                                self.source_selectionnee = []
                                 self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
                                 self.lpiece_forcee["text"] = "Aucune pièce forcée."
                             else:
                                 self.lerreur["text"] = "Félicitations, joueur " + joueur_actuel + ", vous avez gagné!"
                                 self.parent.unbind("<Button-1>")
 
+                        self.source_selectionnee = []
                         self.actualiser_jeu()
 
                 except Exception as e:
