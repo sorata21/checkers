@@ -12,6 +12,8 @@ class InterfaceDamier(tk.Frame):
 
     def __init__(self, parent, taille_case, partie):
 
+        self.parent = parent
+
         # Definition du damier : # de cases
         self.n_lignes = 8
         self.n_colonnes = 8
@@ -34,7 +36,7 @@ class InterfaceDamier(tk.Frame):
         canvas_height = self.n_lignes * self.taille_case
 
         # Initialisation de la fenêtre parent contenant le canvas
-        tk.Frame.__init__(self, parent)
+        tk.Frame.__init__(self, self.parent)
 
         # Initialisation du canvas
         self.canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0, width=canvas_width, height=canvas_height,
@@ -79,7 +81,7 @@ class InterfaceDamier(tk.Frame):
         self.lerreur.grid(column = 0, row = 2, sticky = tk.W)
 
         #Gestion des clics
-        parent.bind("<Button-1>", self.deplacement)
+        self.parent.bind("<Button-1>", self.deplacement)
 
         # Fait en sorte que le redimensionnement de la fenêtre redimensionne le damier
         self.canvas.bind("<Configure>", self.actualiser)
@@ -97,6 +99,7 @@ class InterfaceDamier(tk.Frame):
         self.verifier_deplacement_force()
         self.lpiece_forcee["text"] = "Aucune pièce forcée."
         self.lerreur["text"] = ""
+        self.parent.bind("<Button-1>", self.deplacement)
         self.actualiser_jeu()
 
     def verifier_deplacement_force(self):
@@ -206,7 +209,6 @@ class InterfaceDamier(tk.Frame):
                         elif (self.partie.damier.position_peut_prendre_une_piece_adverse(position)):
                             # Force la position source, puis affiche la position cible forcée dans lpiece_forcee.
                             self.source_selectionnee[0] = position
-                            print(self.partie.doit_prendre)
                             liste_position = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(position, self.partie.doit_prendre)
 
                             if len(liste_position) == 1:
@@ -219,11 +221,17 @@ class InterfaceDamier(tk.Frame):
                             self.lpiece_forcee["text"] = str_temp
 
                         else:
-                            # Met à jour les paramêtres une fois le coup joué
-                            self.source_selectionnee = []
+                            # Vérifie si la partie est terminée. Si ce n'est pas le cas, met à jour les paramètres
+                            # et passe au joueur suivant
+                            joueur_actuel = self.partie.couleur_joueur_courant
                             self.partie.passer_au_joueur_suivant()
-                            self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
-                            self.lpiece_forcee["text"] = "Aucune pièce forcée."
+                            if (self.partie.damier.lister_deplacements_possibles_de_couleur(self.partie.couleur_joueur_courant)):
+                                self.source_selectionnee = []
+                                self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+                                self.lpiece_forcee["text"] = "Aucune pièce forcée."
+                            else:
+                                self.lerreur["text"] = "Félicitations, joueur " + joueur_actuel + ", vous avez gagné!"
+                                self.parent.unbind("<Button-1>")
 
                         self.actualiser_jeu()
 
