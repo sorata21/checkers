@@ -109,7 +109,7 @@ class InterfaceDamier(tk.Frame):
         Charge la partie choisie par l'utilisateur.
         """
         try:
-            nom_fichier = filedialog.askopenfilename(title = "Partie à charger")
+            nom_fichier = filedialog.askopenfilename(title = "Partie à charger", filetypes = [("Fichier texte", "*.txt")])
             self.partie.charger(nom_fichier)
             self.actualiser_jeu()
             self.verifier_deplacement_force()
