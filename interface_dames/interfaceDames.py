@@ -77,6 +77,10 @@ class InterfaceDamier(tk.Frame):
         self.historique = tk.Text(self.deplacements, width = 25, height = 24)
         self.historique.grid(column = 3, row = 1)
 
+        self.sclb = tk.Scrollbar(self.deplacements, command = self.historique.yview)
+        self.sclb.grid(row = 1, column = 4, sticky = 'NS')
+        self.historique['yscrollcommand'] = self.sclb.set
+
         #Création du Label pour afficher les erreurs
         self.lerreur = tk.Label(parent, text = "", foreground = "red")
         self.lerreur.grid(column = 0, row = 2, sticky = tk.W)
