@@ -52,7 +52,7 @@ class InterfaceDamier(tk.Frame):
 
         self.menu.add_command(label = "Nouvelle partie", command = self.nouvelle_partie)
         self.menu.add_command(label = "Charger partie", command = self.charger_partie)
-        self.menu.add_command(label = "Sauvegarder partie")
+        self.menu.add_command(label = "Sauvegarder partie", command = self.sauvegarder_partie)
         self.menu.add_command(label = "Charger partie avec déplacements")
         self.menu.add_command(label = "Sauvegarder partie avec déplacements")
         self.menu.add_command(label = "Quitter", command = parent.quit)
@@ -108,11 +108,23 @@ class InterfaceDamier(tk.Frame):
         """
         Charge la partie choisie par l'utilisateur.
         """
+        try:
+            nom_fichier = filedialog.askopenfilename(title = "Partie à charger")
+            self.partie.charger(nom_fichier)
+            self.actualiser_jeu()
+            self.verifier_deplacement_force()
+        except Exception:
+            pass
 
-        nom_fichier = filedialog.askopenfilename(title = "Partie à charger")
-        self.partie.charger(nom_fichier)
-        self.actualiser_jeu()
-        self.verifier_deplacement_force()
+    def sauvegarder_partie(self):
+        """
+        Sauvegarde la partie.
+        """
+        try:
+            nom_fichier = filedialog.asksaveasfilename(title = "Sauvegarder la partie")
+            self.partie.sauvegarder(nom_fichier)
+        except Exception:
+            pass
 
     def verifier_deplacement_force(self):
         """
