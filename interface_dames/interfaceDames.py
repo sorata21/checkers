@@ -53,8 +53,8 @@ class InterfaceDamier(tk.Frame):
         self.menu.add_command(label = "Nouvelle partie", command = self.nouvelle_partie)
         self.menu.add_command(label = "Charger partie", command = self.charger_partie)
         self.menu.add_command(label = "Sauvegarder partie", command = self.sauvegarder_partie)
-        self.menu.add_command(label = "Charger partie avec déplacements")
-        self.menu.add_command(label = "Sauvegarder partie avec déplacements")
+        self.menu.add_command(label = "Charger partie avec déplacements", command = self.charger_partie_histo)
+        self.menu.add_command(label = "Sauvegarder partie avec déplacements", command = self.sauvegarder_partie_histo)
         self.menu.add_command(label = "Quitter", command = parent.quit)
 
         parent.config(menu = self.menu)
@@ -145,6 +145,19 @@ class InterfaceDamier(tk.Frame):
 
         except Exception:
             pass
+    def sauvegarder_partie_histo(self):
+        """
+        Sauvegarde la partie et son historique.
+        """
+        try:
+            nom_fichier = filedialog.asksaveasfilename(title = "Sauvegarder la partie et l'historique")
+            histo = self.historique.get(1.0,'end')
+
+            self.partie.sauvegarder(nom_fichier, histo, True)
+
+
+        except Exception:
+            pass
 
     def verifier_deplacement_force(self):
         """
@@ -193,7 +206,7 @@ class InterfaceDamier(tk.Frame):
         Ajoute les informations de déplacements dans le Text self.historique
         """
 
-        move = self.partie.couleur_joueur_courant+(": {}->{} \n".format(source, dest))
+        move = self.partie.couleur_joueur_courant[0].upper()+self.partie.couleur_joueur_courant[1:]+(": {}->{} \n".format(source, dest))
         self.historique.insert("end", move)
 
     def deplacement(self, event):

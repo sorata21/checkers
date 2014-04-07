@@ -83,7 +83,7 @@ class Partie:
         """
         return self.damier.joueur_peut_prendre_une_piece_adverse(self.couleur_joueur_courant)
 
-    def sauvegarder(self, nom_fichier):
+    def sauvegarder(self, nom_fichier, historique = [], histo = False):
         """
         Sauvegarde une partie dans un fichier. Le fichier condiendra:
         - Une ligne indiquant la couleur du joueur courant.
@@ -103,6 +103,8 @@ class Partie:
                 else:
                     f.write("None\n")
                 f.writelines(self.damier.convertir_en_chaine())
+                if histo is True:
+                    f.write(historique)
         except:
             raise ProblemeSauvegarde("Problème lors de la sauvegarde.")
 
