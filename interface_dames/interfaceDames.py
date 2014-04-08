@@ -49,14 +49,15 @@ class InterfaceDamier(tk.Frame):
 
         # Création du menu, de ses composantes et ajout à la fenêtre
         self.menu = tk.Menu(parent)
-
         self.menu.add_command(label = "Nouvelle partie", command = self.nouvelle_partie)
-        self.menu.add_command(label = "Charger partie", command = self.charger_partie)
-        self.menu.add_command(label = "Sauvegarder partie", command = self.sauvegarder_partie)
-        self.menu.add_command(label = "Charger partie avec déplacements", command = self.charger_partie_histo)
-        self.menu.add_command(label = "Sauvegarder partie avec déplacements", command = self.sauvegarder_partie_histo)
+        self.save_load = tk.Menu(self.menu)
+        self.save_load.add_command(label = "Sauvegarder partie", command = self.sauvegarder_partie)
+        self.save_load.add_command(label = "Sauvegarder partie avec déplacements", command = self.sauvegarder_partie_histo)
+        self.save_load.add_separator()
+        self.save_load.add_command(label = "Charger partie", command = self.charger_partie)
+        self.save_load.add_command(label = "Charger partie avec déplacements", command = self.charger_partie_histo)
+        self.menu.add_cascade(label = "Sauvegarde et chargement", menu=self.save_load)
         self.menu.add_command(label = "Quitter", command = parent.quit)
-
         parent.config(menu = self.menu)
 
         # Création du LabelFrame et des Label pour contenir les informations sur la partie courante
@@ -114,6 +115,30 @@ class InterfaceDamier(tk.Frame):
         """
         try:
             nom_fichier = filedialog.askopenfilename(title = "Partie à charger", filetypes = [("Fichier texte", "*.txt")])
+            self.partie.charger(nom_fichier)
+            self.actualiser_jeu()
+            self.verifier_deplacement_force()
+            self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+
+            liste_position = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(self.partie.position_source_forcee,
+                                                                                                   self.partie.doit_prendre)
+            if (liste_position == []):
+                self.lpiece_forcee["text"] = "Aucune pièce forcée."
+            elif len(liste_position) == 1:
+                str_temp = "Position cible forcée : " + str(liste_position[0])
+            else:
+                str_temp = "Positions cibles forcées : "
+                for e in liste_position:
+                    str_temp += str(e) + " "
+
+            self.lpiece_forcee["text"] = str_temp
+
+        except Exception:
+            pass
+
+    def charger_partie_histo(self):
+        try:
+            nom_fichier = filedialog.askopenfilename(title = "Partie à charger")
             self.partie.charger(nom_fichier)
             self.actualiser_jeu()
             self.verifier_deplacement_force()
