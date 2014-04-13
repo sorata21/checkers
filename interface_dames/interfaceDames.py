@@ -253,7 +253,6 @@ class InterfaceDamier(tk.Frame):
                     self.source_selectionnee.append((x2, y2))
                     self.canvas.create_rectangle(x1, y1, x2, y2, outline="black", fill="blue", tags="case")
                     self.canvas.tag_raise("piece")
-                    self.canvas.tag_lower("case")
 
                 except Exception as e:
                     self.lerreur["text"] = e
@@ -265,7 +264,6 @@ class InterfaceDamier(tk.Frame):
                                                      self.source_selectionnee[2][0], self.source_selectionnee[2][1],
                                                      outline="black", fill=self.couleur2, tags="case")
                         self.canvas.tag_raise("piece")
-                        self.canvas.tag_lower("case")
                         self.source_selectionnee = []
 
                     else:
@@ -380,6 +378,7 @@ class JeuDeDames:
     def __init__(self):
         # On a besoin d'une fenêtre.
         self.fenetre = tk.Tk()
+        self.fenetre.title("Dames")
 
         # On a besoin d'une partie.
         self.partie = Partie()
