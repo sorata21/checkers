@@ -93,7 +93,7 @@ class InterfaceDamier(tk.Frame):
         self.canvas.bind("<Configure>", self.actualiser)
 
         # Affiche les pièces sur le damier
-        self.actualiser_jeu()
+        self.actualiser()
 
     def nouvelle_partie(self):
         """
@@ -107,7 +107,7 @@ class InterfaceDamier(tk.Frame):
         self.lerreur["text"] = ""
         self.historique.delete(1.0, tk.END)
         self.parent.bind("<Button-1>", self.deplacement)
-        self.actualiser_jeu()
+        self.actualiser()
 
     def charger_partie(self):
         """
@@ -116,7 +116,7 @@ class InterfaceDamier(tk.Frame):
         try:
             nom_fichier = filedialog.askopenfilename(title = "Partie à charger", filetypes = [("Fichier texte", "*.txt")])
             self.partie.charger(nom_fichier)
-            self.actualiser_jeu()
+            self.actualiser()
             self.verifier_deplacement_force()
             self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
 
@@ -140,7 +140,7 @@ class InterfaceDamier(tk.Frame):
         try:
             nom_fichier = filedialog.askopenfilename(title = "Partie à charger")
             self.partie.charger(nom_fichier)
-            self.actualiser_jeu()
+            self.actualiser()
             self.verifier_deplacement_force()
             self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
 
@@ -314,25 +314,27 @@ class InterfaceDamier(tk.Frame):
                                 self.parent.unbind("<Button-1>")
 
                         self.source_selectionnee = []
-                        self.actualiser_jeu()
+                        self.actualiser()
 
                 except Exception as e:
                     self.lerreur["text"] = e
 
         self.verifier_deplacement_force()
 
-    def actualiser(self, event):
+    def actualiser(self, event = None):
         """
         Redessine le damier lorsque la fenetre est redimensionnée.
         """
 
-        # Calcul de la nouvelle taille du damier
-        x_size = int((event.width - 1) / self.n_colonnes)
-        y_size = int((event.height - 1) / self.n_lignes)
-        self.taille_case = min(x_size, y_size)
+        if event is not None:
+            # Calcul de la nouvelle taille du damier
+            x_size = int((event.width - 1) / self.n_colonnes)
+            y_size = int((event.height - 1) / self.n_lignes)
+            self.taille_case = min(x_size, y_size)
 
         # On efface les cases
         self.canvas.delete("case")
+        self.canvas.delete("piece")
 
         # On les redessine
         color = self.couleur2
@@ -357,22 +359,12 @@ class InterfaceDamier(tk.Frame):
                     color = self.couleur2
 
         # On redessine les pieces
-        for position in self.partie.damier.cases.keys():
-            self.placer_piece(position, self.partie.damier.cases[position].nom)
+        for position, piece in self.partie.damier.cases.items():
+            self.ajouter_piece(position, piece.nom)
 
         # On mets les pieces au dessus des cases
         self.canvas.tag_raise("piece")
         self.canvas.tag_lower("case")
-
-    def actualiser_jeu(self):
-        """
-        Met à jour la position des pièces sur le damier.
-        """
-
-        self.canvas.delete("piece")
-        
-        for cle in self.partie.damier.cases.keys():
-            self.ajouter_piece(cle, self.partie.damier.cases[cle].nom)
 
 class JeuDeDames:
     def __init__(self):
