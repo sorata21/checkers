@@ -131,7 +131,9 @@ class Partie:
                     ligne_string, colonne_string = position_string.split(",")
                     self.position_source_forcee = (int(ligne_string), int(colonne_string))
 
-                self.damier.charger_dune_chaine(f.read())
+                chargement = self.damier.charger_dune_chaine(f.read())
+
+                return chargement
         except:
             raise ProblemeChargement("Problème lors du chargement.")
 

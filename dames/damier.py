@@ -248,10 +248,15 @@ class Damier:
         """
         try:
             self.cases.clear()
+            historique = []
             for information_piece in chaine.split("\n"):
                 if information_piece != "":
-                    ligne_string, colonne_string, couleur, type_piece = information_piece.split(",")
-                    self.cases[(int(ligne_string), int(colonne_string))] = Piece(couleur, type_piece)
+                    if information_piece[0] == "B" or information_piece[0] == "N":
+                        historique.append(information_piece)
+                    else:
+                        ligne_string, colonne_string, couleur, type_piece = information_piece.split(",")
+                        self.cases[(int(ligne_string), int(colonne_string))] = Piece(couleur, type_piece)
+            return historique
         except:
             raise ProblemeChargement("Problème lors du chargement.")
 

@@ -139,7 +139,9 @@ class InterfaceDamier(tk.Frame):
     def charger_partie_histo(self):
         try:
             nom_fichier = filedialog.askopenfilename(title = "Partie à charger")
-            self.partie.charger(nom_fichier)
+            charger = self.partie.charger(nom_fichier)
+            for x in charger:
+                self.historique.insert("end", x + "\n")
             self.actualiser()
             self.verifier_deplacement_force()
             self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
