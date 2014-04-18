@@ -44,7 +44,7 @@ class InterfaceDamier(tk.Frame):
                                background=None, name = "damier")
 
         # On place le canvas et le plateau (self) à l'aide de "grid".
-        self.canvas.grid(sticky = tk.W)
+        self.canvas.grid(sticky=tk.N + tk.S + tk.E + tk.W)
         self.grid(rowspan = 2, sticky=tk.N + tk.S + tk.E + tk.W)
 
         # Création du menu, de ses composantes et ajout à la fenêtre
@@ -61,8 +61,8 @@ class InterfaceDamier(tk.Frame):
         parent.config(menu = self.menu)
 
         # Création du LabelFrame et des Label pour contenir les informations sur la partie courante
-        self.informations = tk.LabelFrame(parent, text = "Informations", padx = 15)
-        self.informations.grid(column = 1, row = 0, sticky = tk.W + tk.N)
+        self.informations = tk.LabelFrame(parent, text = "Informations", padx = 15, labelanchor = tk.N)
+        self.informations.grid(column = 1, row = 0, sticky=tk.N + tk.E + tk.W, padx = 10)
 
         self.ltour = tk.Label(self.informations, text = "Tour du joueur " + self.partie.couleur_joueur_courant)
         self.ltour.grid()
@@ -72,19 +72,19 @@ class InterfaceDamier(tk.Frame):
         self.lpiece_forcee.grid()
 
         # Création du LabelFrame et du Text pour afficher l'historique des déplacements
-        self.deplacements = tk.LabelFrame(parent, text = "Déplacements")
-        self.deplacements.grid(column = 1, row = 1, sticky = tk.W + tk.N)
+        self.deplacements = tk.LabelFrame(parent, text = "Déplacements", borderwidth = 0)
+        self.deplacements.grid(column = 1, row = 1, sticky=tk.N + tk.E + tk.W, padx = 10)
 
-        self.historique = tk.Text(self.deplacements, width = 25, height = 24)
-        self.historique.grid(column = 3, row = 1)
+        self.historique = tk.Text(self.deplacements, width = 30, height = 24)
+        self.historique.grid(column = 1, row = 1)
 
         self.sclb = tk.Scrollbar(self.deplacements, command = self.historique.yview)
-        self.sclb.grid(row = 1, column = 4, sticky = 'NS')
+        self.sclb.grid(row = 1, column = 2, sticky = 'NS')
         self.historique['yscrollcommand'] = self.sclb.set
 
         #Création du Label pour afficher les erreurs
         self.lerreur = tk.Label(parent, text = "", foreground = "red")
-        self.lerreur.grid(column = 0, row = 2, sticky = tk.W)
+        self.lerreur.grid(column = 0, row = 2, columnspan = 2, sticky = tk.W)
 
         #Gestion des clics
         self.parent.bind("<Button-1>", self.deplacement)
