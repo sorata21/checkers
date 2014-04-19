@@ -137,7 +137,7 @@ class Partie:
         except:
             raise ProblemeChargement("Problème lors du chargement.")
 
-    def nouvelle_partie(self):
+    def nouvelle_partie(self, plus = False):
         """
         Démarre une nouvelle partie en réinitialisant les attributs à leur valeur par défaut.
         """
@@ -145,3 +145,7 @@ class Partie:
         self.doit_prendre = False
         self.position_source_forcee = None
         self.damier.initialiser_damier_par_default()
+        if plus is True:
+            for x in self.damier.cases:
+                piece = self.damier.get_piece(x)
+                piece.promouvoir()

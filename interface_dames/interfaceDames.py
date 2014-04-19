@@ -23,8 +23,8 @@ class InterfaceDamier(tk.Frame):
         self.taille_case = taille_case
 
         # Definition du damier : couleur de cases
-        self.couleur1 = "white"
-        self.couleur2 = "gray"
+        self.couleur1 = "black"
+        self.couleur2 = "red"
 
         # Assignation de la partie courante
         self.partie = partie
@@ -49,7 +49,13 @@ class InterfaceDamier(tk.Frame):
 
         # Création du menu, de ses composantes et ajout à la fenêtre
         self.menu = tk.Menu(parent)
-        self.menu.add_command(label = "Nouvelle partie", command = self.nouvelle_partie)
+        self.game = tk.Menu(self.menu)
+        self.game.add_command(label = "Nouvelle partie", command = self.nouvelle_partie)
+        self.game.add_separator()
+        self.game.add_command(label = "Nouvelle Partie +", command = self.new_game_plus)
+        self.game.add_separator()
+        self.game.add_command(label = "Quitter", command = parent.quit)
+        self.menu.add_cascade(label = "Partie", menu=self.game)
         self.save_load = tk.Menu(self.menu)
         self.save_load.add_command(label = "Sauvegarder partie", command = self.sauvegarder_partie)
         self.save_load.add_command(label = "Sauvegarder partie avec déplacements", command = self.sauvegarder_partie_histo)
@@ -57,7 +63,7 @@ class InterfaceDamier(tk.Frame):
         self.save_load.add_command(label = "Charger partie", command = self.charger_partie)
         self.save_load.add_command(label = "Charger partie avec déplacements", command = self.charger_partie_histo)
         self.menu.add_cascade(label = "Sauvegarde et chargement", menu=self.save_load)
-        self.menu.add_command(label = "Quitter", command = parent.quit)
+
         parent.config(menu = self.menu)
 
         # Création du LabelFrame et des Label pour contenir les informations sur la partie courante
@@ -108,6 +114,20 @@ class InterfaceDamier(tk.Frame):
         self.historique.delete(1.0, tk.END)
         self.parent.bind("<Button-1>", self.deplacement)
         self.actualiser()
+
+    def new_game_plus(self):
+        """
+        Remet tous les paramètres par défaut et promote les pions en dames
+        """
+        self.partie.nouvelle_partie(True)
+        self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
+        self.verifier_deplacement_force()
+        self.lpiece_forcee["text"] = "Aucune pièce forcée."
+        self.lerreur["text"] = ""
+        self.historique.delete(1.0, tk.END)
+        self.parent.bind("<Button-1>", self.deplacement)
+        self.actualiser()
+
 
     def charger_partie(self):
         """
