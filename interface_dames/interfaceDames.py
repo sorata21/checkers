@@ -24,7 +24,7 @@ class InterfaceDamier(tk.Frame):
 
         # Definition du damier : couleur de cases
         self.couleur1 = "black"
-        self.couleur2 = "red"
+        self.couleur2 = "gray"
 
         # Assignation de la partie courante
         self.partie = partie
@@ -63,6 +63,15 @@ class InterfaceDamier(tk.Frame):
         self.save_load.add_command(label = "Charger partie", command = self.charger_partie)
         self.save_load.add_command(label = "Charger partie avec déplacements", command = self.charger_partie_histo)
         self.menu.add_cascade(label = "Sauvegarde et chargement", menu=self.save_load)
+        self.view = tk.Menu(self.menu)
+        self.color = tk.Menu(self.view)
+        self.color.add_radiobutton(label="Gris&Noir", command=lambda: self.change_view("gray","white"), value=1)
+        self.color.add_radiobutton(label="Noir&Rouge", command=lambda: self.change_view("black","red"), value=2)
+        self.color.add_radiobutton(label="Bleu&Cyan", command=lambda: self.change_view("blue","cyan"), value=3)
+        self.color.add_radiobutton(label="Noir&Gris", command=lambda: self.change_view("black","gray"), value=4)
+        self.view.add_cascade(label="Couleur",menu=self.color)
+        self.view.add_separator()
+        self.menu.add_cascade(label="Affichage", menu=self.view)
 
         parent.config(menu = self.menu)
 
@@ -387,6 +396,11 @@ class InterfaceDamier(tk.Frame):
         # On mets les pieces au dessus des cases
         self.canvas.tag_raise("piece")
         self.canvas.tag_lower("case")
+
+    def change_view(self, case1, case2):
+        self.couleur1 = case1
+        self.couleur2 = case2
+        self.actualiser()
 
 class JeuDeDames:
     def __init__(self):
