@@ -113,7 +113,7 @@ class InterfaceDamier(tk.Frame):
 
     def nouvelle_partie(self):
         """
-        Remet tous les paramètres par défaut puis réaffiche le jeu.
+        Remet tous les paramètres par défaut, puis réaffiche le jeu.
         """
 
         self.partie.nouvelle_partie()
@@ -127,8 +127,9 @@ class InterfaceDamier(tk.Frame):
 
     def new_game_plus(self):
         """
-        Remet tous les paramètres par défaut et promote les pions en dames
+        Remet tous les paramètres par défaut et promeut les pions en dames
         """
+
         self.partie.nouvelle_partie(True)
         self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
         self.verifier_deplacement_force()
@@ -139,6 +140,9 @@ class InterfaceDamier(tk.Frame):
         self.actualiser()
 
     def chargement_partie_gagne(self):
+        """
+        Vérifie si la partie chargée est terminée.
+        """
 
         if (not self.partie.damier.lister_deplacements_possibles_de_couleur(self.partie.couleur_joueur_courant)):
             if (self.partie.couleur_joueur_courant == "blanc"):
@@ -151,6 +155,7 @@ class InterfaceDamier(tk.Frame):
         """
         Charge la partie choisie par l'utilisateur.
         """
+
         try:
             nom_fichier = filedialog.askopenfilename(title = "Partie à charger", filetypes = [("Fichier texte", "*.txt")])
             charger = self.partie.charger(nom_fichier)
@@ -185,6 +190,10 @@ class InterfaceDamier(tk.Frame):
             self.lerreur["text"] = e
 
     def charger_partie_histo(self):
+        """
+        Charge la partie choisie par l'utilisateur avec l'historique des déplacements.
+        """
+
         try:
             nom_fichier = filedialog.askopenfilename(title = "Partie à charger", filetypes = [("Fichier texte", "*.txt")])
             charger = self.partie.charger(nom_fichier)
@@ -224,6 +233,7 @@ class InterfaceDamier(tk.Frame):
         """
         Sauvegarde la partie.
         """
+
         try:
             nom_fichier = filedialog.asksaveasfilename(title = "Sauvegarder la partie", filetypes = [("Fichier texte", "*.txt")])
             self.partie.sauvegarder(nom_fichier)
@@ -233,8 +243,9 @@ class InterfaceDamier(tk.Frame):
 
     def sauvegarder_partie_histo(self):
         """
-        Sauvegarde la partie et son historique.
+        Sauvegarde la partie et l'historique des déplacements.
         """
+
         try:
             nom_fichier = filedialog.asksaveasfilename(title = "Sauvegarder la partie et l'historique", filetypes = [("Fichier texte", "*.txt")])
             histo = self.historique.get(1.0,'end')
@@ -297,7 +308,7 @@ class InterfaceDamier(tk.Frame):
 
     def deplacement(self, event):
 
-        # Vérifie que que l'événement à eu lieu sur le damier.
+        # Vérifie que que l'événement a eu lieu sur le damier.
         if (event.widget.winfo_name() == self.canvas.winfo_name()):
             position = ((event.y // self.taille_case), (event.x // self.taille_case))
 
@@ -428,6 +439,10 @@ class InterfaceDamier(tk.Frame):
         self.canvas.tag_lower("case")
 
     def change_view(self, case1, case2):
+        """
+        Change la couleur du damier selon les couleurs passées en paramètre.
+        """
+
         self.couleur1 = case1
         self.couleur2 = case2
         self.actualiser()
