@@ -103,6 +103,7 @@ class Partie:
                 else:
                     f.write("None\n")
                 f.writelines(self.damier.convertir_en_chaine())
+                #Si l'historique est requise, l'ajoute au fichier.
                 if histo is True:
                     f.write(historique)
         except:
@@ -145,6 +146,7 @@ class Partie:
         self.doit_prendre = False
         self.position_source_forcee = None
         self.damier.initialiser_damier_par_default()
+        #Ajout de la possibilité de faire une partit spécial qu'avec des dames.
         if plus is True:
             for x in self.damier.cases:
                 piece = self.damier.get_piece(x)
