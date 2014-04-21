@@ -4,6 +4,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from dames.partie import Partie
+from dames.exceptions import ProblemeChargement
 
 class InterfaceDamier(tk.Frame):
     """
@@ -65,7 +66,7 @@ class InterfaceDamier(tk.Frame):
         self.menu.add_cascade(label = "Sauvegarde et chargement", menu=self.save_load)
         self.view = tk.Menu(self.menu)
         self.color = tk.Menu(self.view)
-        self.color.add_radiobutton(label="Gris&Noir", command=lambda: self.change_view("gray","white"), value=1)
+        self.color.add_radiobutton(label="Gris&Blanc", command=lambda: self.change_view("gray","white"), value=1)
         self.color.add_radiobutton(label="Noir&Rouge", command=lambda: self.change_view("black","red"), value=2)
         self.color.add_radiobutton(label="Bleu&Cyan", command=lambda: self.change_view("blue","cyan"), value=3)
         self.color.add_radiobutton(label="Noir&Gris", command=lambda: self.change_view("black","gray"), value=4)
@@ -144,76 +145,87 @@ class InterfaceDamier(tk.Frame):
         """
         try:
             nom_fichier = filedialog.askopenfilename(title = "Partie à charger", filetypes = [("Fichier texte", "*.txt")])
-            self.partie.charger(nom_fichier)
-            self.actualiser()
-            self.verifier_deplacement_force()
-            self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
-
-            liste_position = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(self.partie.position_source_forcee,
-                                                                                                   self.partie.doit_prendre)
-            if (liste_position == []):
-                self.lpiece_forcee["text"] = "Aucune pièce forcée."
-            elif len(liste_position) == 1:
-                str_temp = "Position cible forcée : " + str(liste_position[0])
+            charger = self.partie.charger(nom_fichier)
+            if charger != []:
+                self.nouvelle_partie()
+                raise ProblemeChargement("Le fichier contient des déplacements.")
             else:
-                str_temp = "Positions cibles forcées : "
-                for e in liste_position:
-                    str_temp += str(e) + " "
+                self.lerreur["text"] = ""
+                self.actualiser()
+                self.verifier_deplacement_force()
+                self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
 
-            self.lpiece_forcee["text"] = str_temp
+                liste_position = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(self.partie.position_source_forcee,
+                                                                                                       self.partie.doit_prendre)
+                if (liste_position == []):
+                    str_temp = "Aucune pièce forcée."
+                elif len(liste_position) == 1:
+                    str_temp = "Position cible forcée : " + str(liste_position[0])
+                else:
+                    str_temp = "Positions cibles forcées : "
+                    for e in liste_position:
+                        str_temp += str(e) + " "
 
-        except Exception:
-            pass
+                self.lpiece_forcee["text"] = str_temp
+
+        except Exception as e:
+            self.lerreur["text"] = e
 
     def charger_partie_histo(self):
         try:
-            nom_fichier = filedialog.askopenfilename(title = "Partie à charger")
+            nom_fichier = filedialog.askopenfilename(title = "Partie à charger", filetypes = [("Fichier texte", "*.txt")])
             charger = self.partie.charger(nom_fichier)
-            for x in charger:
-                self.historique.insert("end", x + "\n")
-            self.actualiser()
-            self.verifier_deplacement_force()
-            self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
-
-            liste_position = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(self.partie.position_source_forcee,
-                                                                                                   self.partie.doit_prendre)
-            if (liste_position == []):
-                self.lpiece_forcee["text"] = "Aucune pièce forcée."
-            elif len(liste_position) == 1:
-                str_temp = "Position cible forcée : " + str(liste_position[0])
+            if charger == []:
+                self.nouvelle_partie()
+                raise ProblemeChargement("Le fichier ne contient pas de déplacements.")
             else:
-                str_temp = "Positions cibles forcées : "
-                for e in liste_position:
-                    str_temp += str(e) + " "
+                self.lerreur["text"] = ""
+                for x in charger:
+                    self.historique.insert("end", x + "\n")
+                self.actualiser()
+                self.verifier_deplacement_force()
+                self.ltour["text"] = "Tour du joueur " + self.partie.couleur_joueur_courant
 
-            self.lpiece_forcee["text"] = str_temp
+                liste_position = self.partie.damier.lister_deplacements_possibles_a_partir_de_position(self.partie.position_source_forcee,
+                                                                                                       self.partie.doit_prendre)
+                if (liste_position == []):
+                    str_temp = "Aucune pièce forcée."
+                elif len(liste_position) == 1:
+                    str_temp = "Position cible forcée : " + str(liste_position[0])
+                else:
+                    str_temp = "Positions cibles forcées : "
+                    for e in liste_position:
+                        str_temp += str(e) + " "
 
-        except Exception:
-            pass
+                self.lpiece_forcee["text"] = str_temp
+
+        except Exception as e:
+            self.lerreur["text"] = e
 
     def sauvegarder_partie(self):
         """
         Sauvegarde la partie.
         """
         try:
-            nom_fichier = filedialog.asksaveasfilename(title = "Sauvegarder la partie")
+            nom_fichier = filedialog.asksaveasfilename(title = "Sauvegarder la partie", filetypes = [("Fichier texte", "*.txt")])
             self.partie.sauvegarder(nom_fichier)
 
-        except Exception:
-            pass
+        except Exception as e:
+            self.lerreur["text"] = e
+
     def sauvegarder_partie_histo(self):
         """
         Sauvegarde la partie et son historique.
         """
         try:
-            nom_fichier = filedialog.asksaveasfilename(title = "Sauvegarder la partie et l'historique")
+            nom_fichier = filedialog.asksaveasfilename(title = "Sauvegarder la partie et l'historique", filetypes = [("Fichier texte", "*.txt")])
             histo = self.historique.get(1.0,'end')
 
             self.partie.sauvegarder(nom_fichier, histo, True)
 
 
-        except Exception:
-            pass
+        except Exception as e:
+            self.lerreur["text"] = e
 
     def verifier_deplacement_force(self):
         """
