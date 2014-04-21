@@ -138,6 +138,14 @@ class InterfaceDamier(tk.Frame):
         self.parent.bind("<Button-1>", self.deplacement)
         self.actualiser()
 
+    def chargement_partie_gagne(self):
+
+        if (not self.partie.damier.lister_deplacements_possibles_de_couleur(self.partie.couleur_joueur_courant)):
+            if (self.partie.couleur_joueur_courant == "blanc"):
+                self.lerreur["text"] = "Félicitations, joueur noir, vous avez gagné!"
+            else:
+                self.lerreur["text"] = "Félicitations, joueur blanc, vous avez gagné!"
+            self.parent.unbind("<Button-1>")
 
     def charger_partie(self):
         """
@@ -146,6 +154,8 @@ class InterfaceDamier(tk.Frame):
         try:
             nom_fichier = filedialog.askopenfilename(title = "Partie à charger", filetypes = [("Fichier texte", "*.txt")])
             charger = self.partie.charger(nom_fichier)
+
+            #Vérifie si le fichier choisi contient des déplacements.
             if charger != []:
                 self.nouvelle_partie()
                 raise ProblemeChargement("Le fichier contient des déplacements.")
@@ -168,6 +178,9 @@ class InterfaceDamier(tk.Frame):
 
                 self.lpiece_forcee["text"] = str_temp
 
+                #Vérifie si la partie chargée est terminée.
+                self.chargement_partie_gagne()
+
         except Exception as e:
             self.lerreur["text"] = e
 
@@ -175,6 +188,8 @@ class InterfaceDamier(tk.Frame):
         try:
             nom_fichier = filedialog.askopenfilename(title = "Partie à charger", filetypes = [("Fichier texte", "*.txt")])
             charger = self.partie.charger(nom_fichier)
+
+            #Vérifie si le fichier choisi contient des déplacements.
             if charger == []:
                 self.nouvelle_partie()
                 raise ProblemeChargement("Le fichier ne contient pas de déplacements.")
@@ -198,6 +213,9 @@ class InterfaceDamier(tk.Frame):
                         str_temp += str(e) + " "
 
                 self.lpiece_forcee["text"] = str_temp
+
+                #Vérifie si la partie chargée est terminée.
+                self.chargement_partie_gagne()
 
         except Exception as e:
             self.lerreur["text"] = e
